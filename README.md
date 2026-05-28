@@ -1,32 +1,20 @@
-AI‑Powered CV Reviewer & Resume Optimization Platform
-An AI‑driven Resume & CV Reviewer platform designed to automate resume analysis, ATS scoring, and AI‑powered career recommendations for technology‑focused roles.
-Built during Summer 2026, the system leverages modern backend architecture, semantic search, and Large Language Models (LLMs) to deliver tailored, actionable feedback for candidates in software engineering, data, cloud, AI, cybersecurity, and related tech domains.
+AI-Powered CV Reviewer & Resume Optimisation Platform
 
-✨ Features
-AI‑powered CV analysis & scoring
+An AI-driven resume intelligence system that automates CV parsing, ATS evaluation, and semantic job matching to generate structured, actionable career feedback for candidates in software engineering, data science, cloud engineering, AI, and cybersecurity domains.
 
-ATS (Applicant Tracking System) compatibility review
+Built as a modular backend system (Summer 2026), the platform combines LLMs, vector embeddings, and document ingestion pipelines to transform unstructured CVs into structured skill profiles and compute similarity against live job descriptions.
 
-AI‑generated resume improvement suggestions
+🧠 System Capabilities
+Automated CV ingestion and structured text extraction (PDF parsing pipeline)
+ATS compatibility scoring based on keyword + structural heuristics
+LLM-driven resume improvement and rewriting suggestions
+Semantic skill extraction using embedding-based representation learning
+Job description similarity matching via vector search
+Skill-gap analysis against target roles in tech domains
+Real-time optimisation recommendations powered by LLM inference
+Job market keyword trend extraction via scraping pipeline
 
-Technology‑industry keyword optimisation
-
-Skill‑gap detection for tech roles
-
-Resume enhancement recommendations
-
-Semantic matching against job descriptions
-
-Real‑time scraping of tech hiring trends
-
-Modular backend API architecture using FastAPI
-
-Cloud‑native deployment with containerisation
-
-System Overview
-This project is a full-stack AI CV optimisation system using FastAPI, OpenAI embeddings, and Pinecone for semantic search.
 ## 🧱 System Tech Stack Overview
-
 ---
 
 ### 🎨 Frontend Layer
