@@ -44,12 +44,11 @@ Uvicorn — ASGI server
 
 Requests — HTTP client
 
-BeautifulSoup4 — web scraping
 
 PDF ingestion pipeline using PyPDF2
 
 Modular architecture (api/, ingestion/, services/)
-
+Custom ingestion pipeline for PDF parsing and preprocessing
 AI & NLP
 OpenAI API / LLM Models
 
