@@ -1,0 +1,23 @@
+# Virtual environment — Docker installs its own
+.venv/
+
+# API keys — never go into an image
+.env
+
+# Compiled Python bytecode — regenerated automatically
+__pycache__/
+*.pyc
+*.pyo
+
+# ChromaDB data — regenerated on startup via knowledge base loader
+data/
+
+# Tests — not needed at runtime
+tests/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
