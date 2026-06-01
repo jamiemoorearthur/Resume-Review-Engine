@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from app.api import health, review
+from app.api import health, review, upload
 from app.ingestion.chunker import chunk_text
 from app.embeddings.embedder import embed_texts
 from app.vectorstore.chroma import get_collection, add_documents
@@ -51,6 +51,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CV Reviewer API", lifespan=lifespan)
 
 app.include_router(health.router)
+app.include_router(upload.router)
 app.include_router(review.router)
 
 
