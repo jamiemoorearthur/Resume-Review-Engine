@@ -248,5 +248,5 @@ Once the Azure deployment is stable, the system will be migrated to Kubernetes f
 Built by [Seyi Bello](https://github.com/seyiabello) and [Jamie Moore-Arthur](https://github.com/jamiemoorearthur) and [Rochelle Smith](https://github.com/rochellejjsmith)
 
 - Seyi: AI/application layer (RAG pipeline, review logic, API endpoints, frontend UI, infrastructure)
-- Jamie: Data engineering layer (ingestion pipeline, embeddings, vector store, file upload)
+- Jamie: Data engineering layer (ingestion pipeline, embeddings, vector store, file upload, Knowledge Base)
 - Rochelle: Front-end/UX & UI (React, JavaScript, TypeScript, Website Design)
