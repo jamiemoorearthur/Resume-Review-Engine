@@ -282,8 +282,8 @@ Full Azure deployment managed with Terraform: Azure Container Registry, Azure Co
 
 ## Team
 
-Built by [Seyi Bello](https://github.com/seyiabello) and [Jamie Moore-Arthur](https://github.com/jamiemoorearthur).
+Built by [Seyi Bello](https://github.com/seyiabello), [Jamie Moore-Arthur](https://github.com/jamiemoorearthur), and [Rochelle Smith](https://github.com/rochellejjsmith).
 
 - Seyi: AI/application layer (RAG pipeline, embeddings, vector store, review logic, API endpoints, infrastructure, CI/CD, security)
 - Jamie: Knowledge base content, ingestion pipeline, file upload, FastAPI contributions
-- Rochelle: Frontend (React UI, component design, upload flow, results display, Vercel deployment)
+- [Rochelle Smith](https://github.com/rochellejjsmith): Frontend (React UI, component design, upload flow, results display, Vercel deployment)
