@@ -45,8 +45,8 @@ function Upload() {
       <nav className="navbar">
         <div className="nav-inner">
           <div className="logo">
-            <span className="logo-icon">✦</span>
-            <span className="logo-text">CVReview<span className="logo-accent">AI</span></span>
+            <div className="logo-mark">IQ</div>
+            <span className="logo-text">CV<span className="logo-accent">IQ</span></span>
           </div>
           <button className="back-btn" onClick={() => navigate('/')}>← Back to home</button>
         </div>
@@ -119,10 +119,10 @@ function Upload() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="logo">
-            <span className="logo-icon">✦</span>
-            <span className="logo-text">CVReview<span className="logo-accent">AI</span></span>
+            <div className="logo-mark">IQ</div>
+            <span className="logo-text">CV<span className="logo-accent">IQ</span></span>
           </div>
-          <p className="footer-text">Built with FastAPI, React & GPT-4o</p>
+          <p className="footer-text">Built with FastAPI, React & GPT-4o · © 2026 CVIQ</p>
         </div>
       </footer>
     </div>
