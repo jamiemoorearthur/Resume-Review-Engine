@@ -17,7 +17,7 @@ An AI-powered CV review platform that analyses your resume against a real job de
 
 | | URL |
 |---|---|
-| **Frontend** | [project-splj5.vercel.app](https://project-splj5.vercel.app) |
+| **Frontend** | [cviq27.vercel.app](https://cviq27.vercel.app/) |
 | **Backend API** | [cv-reviewer-api.onrender.com/docs](https://cv-reviewer-api.onrender.com/docs) |
 
 > Note: The backend runs on Render's free tier and spins down after 15 minutes of inactivity. The first request may take 30 seconds to wake up.
