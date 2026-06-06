@@ -8,13 +8,18 @@ from app.core.exceptions import CVReviewerError
 
 router = APIRouter()
 
-# Presidio PII detection — non-fatal if package not installed
+# Presidio PII detection — non-fatal if package or spaCy model not available
 _pii_analyzer = None
 try:
     from presidio_analyzer import AnalyzerEngine
-    _pii_analyzer = AnalyzerEngine()
+    from presidio_analyzer.nlp_engine import NlpEngineProvider
+    _nlp_engine = NlpEngineProvider(nlp_configuration={
+        "nlp_engine_name": "spacy",
+        "models": [{"lang_code": "en", "model_name": "en_core_web_sm"}],
+    }).create_engine()
+    _pii_analyzer = AnalyzerEngine(nlp_engine=_nlp_engine, supported_languages=["en"])
     print("[pii-gate] Presidio analyzer initialized")
-except Exception as e:
+except BaseException as e:
     print(f"[pii-gate] Presidio not available: {e}")
 
 

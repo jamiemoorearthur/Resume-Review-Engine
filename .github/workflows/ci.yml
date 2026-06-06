@@ -18,7 +18,9 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+        run: |
+          pip install -r backend/requirements.txt
+          python -m spacy download en_core_web_sm
 
       - name: Run tests
         run: pytest backend/tests/ -v
