@@ -36,6 +36,14 @@ from app.core.config import settings
 GOLDEN_DATASET = Path(__file__).parent / "golden_dataset.json"
 COLLECTION_NAME = "knowledge_base"
 
+# Minimum acceptable scores — eval job fails (and Langfuse records the breach) if any drop below these.
+_THRESHOLDS = {
+    "faithfulness": 0.70,
+    "answer_relevancy": 0.70,
+    "context_precision": 0.60,
+    "context_recall": 0.60,
+}
+
 
 def _init_langfuse():
     if not settings.langfuse_public_key:
@@ -163,6 +171,24 @@ def main():
         _push_scores(langfuse, scores, run_id)
     else:
         print("\n[eval] LANGFUSE_PUBLIC_KEY not set — scores not persisted")
+
+    # Quality gate — alert and fail if any metric falls below its threshold.
+    breaches = {m: v for m, v in scores.items() if v < _THRESHOLDS[m]}
+    if breaches:
+        print("\n=== QUALITY GATE FAILED ===")
+        for metric, value in breaches.items():
+            print(f"[alert] type=quality_drop metric={metric} score={value:.3f} threshold={_THRESHOLDS[metric]}")
+        if langfuse:
+            try:
+                run_id_alert = f"ragas-alert-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}"
+                alert_trace = langfuse.trace(name="ragas-quality-alert", id=run_id_alert)
+                for metric, value in breaches.items():
+                    langfuse.score(trace_id=run_id_alert, name=f"alert_{metric}", value=round(float(value), 4))
+                alert_trace.update(output={"breaches": {m: round(float(v), 4) for m, v in breaches.items()}})
+                langfuse.flush()
+            except Exception as e:
+                print(f"[eval] failed to push alert to Langfuse: {e}")
+        sys.exit(1)
 
     return results
 

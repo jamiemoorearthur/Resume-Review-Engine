@@ -9,6 +9,8 @@ client = OpenAI(api_key=settings.openai_api_key)
 
 _COST_PER_INPUT_TOKEN = 0.15 / 1_000_000
 _COST_PER_OUTPUT_TOKEN = 0.60 / 1_000_000
+_COST_ALERT_THRESHOLD_USD = 0.01   # alert if a single request exceeds 1 cent
+_LATENCY_ALERT_THRESHOLD_MS = 8_000  # alert if inference alone exceeds 8 s
 
 _HALLUCINATION_MARKERS = [
     "as an ai",
@@ -72,6 +74,21 @@ def generate_review(cv_text: str, job_description: str, context_chunks: list[str
         f"[llm] prompt={usage.prompt_tokens} completion={usage.completion_tokens} "
         f"total={usage.total_tokens} cost=${cost:.4f} latency={elapsed_ms:.0f}ms"
     )
+
+    if cost > _COST_ALERT_THRESHOLD_USD:
+        print(f"[alert] type=cost_spike cost=${cost:.4f} threshold=${_COST_ALERT_THRESHOLD_USD:.4f}")
+        try:
+            if trace:
+                trace.event(name="cost_spike", metadata={"cost_usd": round(cost, 6), "threshold_usd": _COST_ALERT_THRESHOLD_USD})
+        except Exception:
+            pass
+    if elapsed_ms > _LATENCY_ALERT_THRESHOLD_MS:
+        print(f"[alert] type=inference_latency_spike latency={elapsed_ms:.0f}ms threshold={_LATENCY_ALERT_THRESHOLD_MS}ms")
+        try:
+            if trace:
+                trace.event(name="inference_latency_spike", metadata={"latency_ms": round(elapsed_ms), "threshold_ms": _LATENCY_ALERT_THRESHOLD_MS})
+        except Exception:
+            pass
 
     try:
         if generation:

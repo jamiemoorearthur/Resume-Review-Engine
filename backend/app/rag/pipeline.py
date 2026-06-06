@@ -6,6 +6,8 @@ from app.rag.generator import generate_review
 
 logger = logging.getLogger(__name__)
 
+_PIPELINE_LATENCY_ALERT_MS = 15_000  # alert if full pipeline (retrieval + inference) exceeds 15 s
+
 _langfuse = None
 
 try:
@@ -44,6 +46,14 @@ def run_review_pipeline(cv_text: str, job_description: str) -> dict:
 
     total_ms = (time.perf_counter() - t0) * 1000
     print(f"[pipeline] total_latency={total_ms:.0f}ms")
+
+    if total_ms > _PIPELINE_LATENCY_ALERT_MS:
+        print(f"[alert] type=pipeline_latency_spike total_ms={total_ms:.0f} threshold={_PIPELINE_LATENCY_ALERT_MS}ms")
+        try:
+            if trace:
+                trace.event(name="pipeline_latency_spike", metadata={"total_ms": round(total_ms), "threshold_ms": _PIPELINE_LATENCY_ALERT_MS})
+        except Exception:
+            pass
 
     try:
         if trace:
