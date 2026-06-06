@@ -1,3 +1,4 @@
+import time
 import logging
 from app.core.config import settings
 from app.rag.retriever import retrieve_context
@@ -20,6 +21,7 @@ except Exception as e:
 
 
 def run_review_pipeline(cv_text: str, job_description: str) -> dict:
+    t0 = time.perf_counter()
     trace = None
     try:
         if _langfuse:
@@ -40,9 +42,14 @@ def run_review_pipeline(cv_text: str, job_description: str) -> dict:
     context_chunks = retrieve_context(query, n_results=6, trace=trace)
     result = generate_review(cv_text, job_description, context_chunks, trace=trace)
 
+    total_ms = (time.perf_counter() - t0) * 1000
+    print(f"[pipeline] total_latency={total_ms:.0f}ms")
+
     try:
         if trace:
-            trace.update(output={"overall_score": result.get("overall_score")})
+            trace.update(output={
+                "overall_score": result.get("overall_score"),
+            }, metadata={"total_latency_ms": round(total_ms)})
     except Exception as e:
         logger.warning(f"Langfuse trace update failed: {e}")
 

@@ -2,8 +2,10 @@
 RAG evaluation using Ragas.
 
 Measures:
-- faithfulness: are review claims grounded in the retrieved knowledge base chunks?
-- answer_relevancy: does the review address what was asked?
+- faithfulness:        are review claims grounded in the retrieved knowledge base chunks?
+- answer_relevancy:    does the review address what was asked?
+- context_precision:   are the retrieved chunks relevant to the ground truth answer?
+- context_recall:      does the retrieved context cover the ground truth answer?
 
 Run from the backend/ directory:
     pip install -r requirements-eval.txt
@@ -20,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy
+from ragas.metrics import faithfulness, answer_relevancy, context_precision, context_recall
 
 from app.embeddings.embedder import embed_single
 from app.vectorstore.chroma import get_collection, query_collection
@@ -53,7 +55,7 @@ def run_pipeline_for_eval(cv_text: str, job_description: str):
     query = f"{cv_text[:1000]}\n\n{job_description[:500]}"
     collection = get_collection(COLLECTION_NAME)
     embedding = embed_single(query)
-    chunks = query_collection(collection, embedding, n_results=6)
+    chunks, _ = query_collection(collection, embedding, n_results=6)
     review = generate_review(cv_text, job_description, chunks)
     return chunks, review
 
@@ -62,7 +64,7 @@ def main():
     with open(GOLDEN_DATASET) as f:
         examples = json.load(f)
 
-    questions, answers, contexts = [], [], []
+    questions, answers, contexts, ground_truths = [], [], [], []
 
     for example in examples:
         print(f"Running pipeline for: {example['description']}")
@@ -75,28 +77,38 @@ def main():
         )
         answers.append(review_to_prose(review))
         contexts.append(chunks)
+        ground_truths.append(example["ground_truth"])
         print(f"  overall_score={review.get('overall_score')} ats_score={review.get('ats_score')}")
 
     dataset = Dataset.from_dict({
         "question": questions,
         "answer": answers,
         "contexts": contexts,
+        "ground_truth": ground_truths,
     })
 
     print("\nRunning Ragas evaluation...")
     results = evaluate(
         dataset=dataset,
-        metrics=[faithfulness, answer_relevancy],
+        metrics=[faithfulness, answer_relevancy, context_precision, context_recall],
     )
 
     print("\n=== Ragas Evaluation Results ===")
-    print(f"Faithfulness:     {results['faithfulness']:.3f}  (1.0 = fully grounded in retrieved context)")
-    print(f"Answer Relevancy: {results['answer_relevancy']:.3f}  (1.0 = directly answers the question)")
+    print(f"Faithfulness:        {results['faithfulness']:.3f}  (1.0 = fully grounded in retrieved context)")
+    print(f"Answer Relevancy:    {results['answer_relevancy']:.3f}  (1.0 = directly answers the question)")
+    print(f"Context Precision:   {results['context_precision']:.3f}  (1.0 = all retrieved chunks are relevant)")
+    print(f"Context Recall:      {results['context_recall']:.3f}  (1.0 = ground truth fully covered by context)")
     print()
     print("Per-example breakdown:")
     df = results.to_pandas()
     for i, row in df.iterrows():
-        print(f"  [{examples[i]['id']}] faithfulness={row['faithfulness']:.3f}  relevancy={row['answer_relevancy']:.3f}")
+        print(
+            f"  [{examples[i]['id']}] "
+            f"faithfulness={row['faithfulness']:.3f}  "
+            f"relevancy={row['answer_relevancy']:.3f}  "
+            f"precision={row['context_precision']:.3f}  "
+            f"recall={row['context_recall']:.3f}"
+        )
 
     return results
 

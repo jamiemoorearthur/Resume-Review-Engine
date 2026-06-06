@@ -108,6 +108,8 @@ A [Ragas](https://ragas.io/) evaluation suite runs against a golden dataset of s
 |---|---|
 | **Faithfulness** | Are review claims grounded in the retrieved knowledge base context? |
 | **Answer Relevancy** | Is the feedback relevant to the specific CV and job description submitted? |
+| **Context Precision** | Are the retrieved chunks actually useful for generating the correct answer? |
+| **Context Recall** | Does the retrieved context cover everything in the expected answer? |
 
 Run manually:
 ```bash
@@ -135,6 +137,14 @@ After every GPT call, token usage and estimated cost are printed to the server l
 ### Output gate
 
 The JSON response is scanned for hallucination markers (`"as an ai"`, `"i believe"`, `"i'm not sure"`, etc.) before being returned to the frontend. Any trigger is logged and flagged in the response payload for audit.
+
+### PII detection — Microsoft Presidio
+
+Every CV submitted is scanned by [Presidio](https://microsoft.github.io/presidio/) before processing. Detected PII entities (names, email addresses, phone numbers, etc.) are logged for audit — the CV content is not masked before reaching the LLM, as the review requires it, but every entity type is recorded so the system has a full audit trail of what personal data was processed.
+
+### Chunk metadata
+
+Every knowledge base chunk stored in ChromaDB carries a source filename, SHA-256 document hash, chunk index, and ingestion timestamp. This enables targeted deletes when documents change, a full audit trail for retrieved content, and blast-radius isolation if bad data enters the index.
 
 ---
 
@@ -166,7 +176,8 @@ The JSON response is scanned for hallucination markers (`"as an ai"`, `"i believ
 | [OpenAI text-embedding-3-small](https://platform.openai.com/docs/guides/embeddings) | Semantic embeddings |
 | [ChromaDB 0.6.3](https://www.trychroma.com/) | Local vector store |
 | [Langfuse](https://langfuse.com/) | LLM observability — traces, spans, generations, cost tracking |
-| [Ragas](https://ragas.io/) | RAG evaluation — faithfulness and answer relevancy metrics |
+| [Ragas](https://ragas.io/) | RAG evaluation — faithfulness, answer relevancy, context precision, context recall |
+| [Microsoft Presidio](https://microsoft.github.io/presidio/) | PII detection and audit logging on CV input |
 
 ### Infrastructure
 | Technology | Purpose |

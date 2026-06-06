@@ -1,4 +1,6 @@
+import hashlib
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -23,23 +25,33 @@ def _load_knowledge_base() -> None:
     collection = get_collection(COLLECTION_NAME)
 
     for md_file in KNOWLEDGE_BASE_DIR.glob("*.md"):
-        text = md_file.read_text(encoding="utf-8")
-        chunks = chunk_text(text)
+        raw = md_file.read_text(encoding="utf-8")
+        doc_hash = hashlib.sha256(raw.encode()).hexdigest()
+        chunks = chunk_text(raw)
 
-        # Build a unique ID for each chunk: filename + chunk index
         ids = [f"{md_file.stem}_{i}" for i in range(len(chunks))]
 
-        # Check which IDs are already in the collection — skip those
         existing = set(collection.get(ids=ids)["ids"])
         new_ids = [id_ for id_ in ids if id_ not in existing]
         new_chunks = [chunks[ids.index(id_)] for id_ in new_ids]
 
         if not new_chunks:
-            continue  # all chunks from this file are already stored
+            continue
+
+        ingested_at = datetime.now(timezone.utc).isoformat()
+        metadatas = [
+            {
+                "source": md_file.name,
+                "doc_hash": doc_hash,
+                "chunk_index": ids.index(id_),
+                "ingested_at": ingested_at,
+            }
+            for id_ in new_ids
+        ]
 
         embeddings = embed_texts(new_chunks)
-        add_documents(collection, new_chunks, embeddings, new_ids)
-        print(f"Loaded {len(new_chunks)} chunks from {md_file.name}")
+        add_documents(collection, new_chunks, embeddings, new_ids, metadatas)
+        print(f"Loaded {len(new_chunks)} chunks from {md_file.name} (hash={doc_hash[:8]})")
 
 
 @asynccontextmanager

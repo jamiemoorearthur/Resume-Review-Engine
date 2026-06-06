@@ -1,4 +1,5 @@
 import json
+import time
 from openai import OpenAI
 from app.core.config import settings
 from app.core.exceptions import LLMError
@@ -49,6 +50,7 @@ def generate_review(cv_text: str, job_description: str, context_chunks: list[str
     except Exception:
         generation = None
 
+    t0 = time.perf_counter()
     try:
         response = client.chat.completions.create(
             model=settings.openai_model,
@@ -64,11 +66,12 @@ def generate_review(cv_text: str, job_description: str, context_chunks: list[str
             pass
         raise LLMError(f"GPT call failed: {e}") from e
 
+    elapsed_ms = (time.perf_counter() - t0) * 1000
     usage = response.usage
     cost = (usage.prompt_tokens * _COST_PER_INPUT_TOKEN) + (usage.completion_tokens * _COST_PER_OUTPUT_TOKEN)
     print(
-        f"[tokens] prompt={usage.prompt_tokens} completion={usage.completion_tokens} "
-        f"total={usage.total_tokens} cost=${cost:.4f}"
+        f"[llm] prompt={usage.prompt_tokens} completion={usage.completion_tokens} "
+        f"total={usage.total_tokens} cost=${cost:.4f} latency={elapsed_ms:.0f}ms"
     )
 
     try:
@@ -80,7 +83,10 @@ def generate_review(cv_text: str, job_description: str, context_chunks: list[str
                     "completion_tokens": usage.completion_tokens,
                     "total_tokens": usage.total_tokens,
                 },
-                metadata={"estimated_cost_usd": round(cost, 6)},
+                metadata={
+                    "estimated_cost_usd": round(cost, 6),
+                    "latency_ms": round(elapsed_ms),
+                },
             )
     except Exception:
         pass

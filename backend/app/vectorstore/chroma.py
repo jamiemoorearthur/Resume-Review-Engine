@@ -17,11 +17,13 @@ def add_documents(
     texts: list[str],
     embeddings: list[list[float]],
     ids: list[str],
+    metadatas: list[dict] | None = None,
 ) -> None:
     collection.add(
         documents=texts,
         embeddings=embeddings,
         ids=ids,
+        metadatas=metadatas,
     )
 
 

@@ -6,6 +6,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Download spaCy language model required by Presidio PII detection
+RUN python -m spacy download en_core_web_lg
+
 # Copy the rest of the backend code
 COPY . .
 
