@@ -3,17 +3,18 @@ RAG evaluation using Ragas.
 
 Measures:
 - answer_relevancy:    does the review address what was asked?
-- context_precision:   are the retrieved rubric chunks relevant to the query?
+- context_utilization: what fraction of the retrieved rubric chunks were used in the answer?
 
 Metrics NOT used and why:
-- faithfulness:     requires answer claims to be attributable to retrieved context.
-                    This system uses the knowledge base as a scoring rubric, not as
-                    a factual source — review claims ("candidate has FastAPI experience")
-                    are derived from the CV/JD, not from rubric text. Score is
-                    structurally near 0 regardless of quality.
-- context_recall:   requires ground_truth to describe what the context should contain.
-                    Our ground_truth describes the expected review output (CV-specific),
-                    which will never appear in generic rubric chunks. Always 0.
+- faithfulness:       requires answer claims to be attributable to retrieved context.
+                      This system uses the knowledge base as a scoring rubric, not as
+                      a factual source — review claims ("candidate has FastAPI experience")
+                      are derived from the CV/JD, not from rubric text. Score is
+                      structurally near 0 regardless of quality.
+- context_recall:     requires ground_truth to describe what the context should contain.
+                      Our ground_truth describes expected review output (CV-specific),
+                      which will never appear in generic rubric chunks. Always 0.
+- context_precision:  also requires ground_truth in the dataset.
 
 Scores are pushed to Langfuse after each run for tracking over time.
 
@@ -34,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import answer_relevancy, context_precision
+from ragas.metrics import answer_relevancy, context_utilization
 
 from app.embeddings.embedder import embed_single
 from app.vectorstore.chroma import get_collection, query_collection
@@ -47,7 +48,7 @@ COLLECTION_NAME = "knowledge_base"
 # Minimum acceptable scores — eval job fails (and Langfuse records the breach) if any drop below these.
 _THRESHOLDS = {
     "answer_relevancy": 0.70,
-    "context_precision": 0.60,
+    "context_utilization": 0.50,
 }
 
 
@@ -142,17 +143,17 @@ def main():
     print("\nRunning Ragas evaluation...")
     results = evaluate(
         dataset=dataset,
-        metrics=[answer_relevancy, context_precision],
+        metrics=[answer_relevancy, context_utilization],
     )
 
     scores = {
         "answer_relevancy": results["answer_relevancy"],
-        "context_precision": results["context_precision"],
+        "context_utilization": results["context_utilization"],
     }
 
     print("\n=== Ragas Evaluation Results ===")
-    print(f"Answer Relevancy:    {scores['answer_relevancy']:.3f}  (1.0 = review directly addresses the question)")
-    print(f"Context Precision:   {scores['context_precision']:.3f}  (1.0 = all retrieved rubric chunks are relevant)")
+    print(f"Answer Relevancy:      {scores['answer_relevancy']:.3f}  (1.0 = review directly addresses the question)")
+    print(f"Context Utilization:   {scores['context_utilization']:.3f}  (1.0 = all retrieved rubric chunks used in the answer)")
     print()
     print("Per-example breakdown:")
     df = results.to_pandas()
@@ -160,7 +161,7 @@ def main():
         print(
             f"  [{examples[i]['id']}] "
             f"relevancy={row['answer_relevancy']:.3f}  "
-            f"precision={row['context_precision']:.3f}"
+            f"utilization={row['context_utilization']:.3f}"
         )
 
     langfuse = _init_langfuse()
