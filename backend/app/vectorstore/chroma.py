@@ -27,6 +27,28 @@ def add_documents(
     )
 
 
+def delete_by_source(
+    collection: chromadb.Collection,
+    source: str,
+) -> dict:
+    """Delete all chunks whose metadata source field matches `source`.
+
+    Returns a summary dict with the IDs removed and the doc_hash from the
+    first matching chunk (all chunks from the same file share the same hash).
+    """
+    results = collection.get(
+        where={"source": {"$eq": source}},
+        include=["metadatas"],
+    )
+    ids = results["ids"]
+    if not ids:
+        return {"ids_deleted": [], "doc_hash": None}
+
+    doc_hash = (results["metadatas"][0] or {}).get("doc_hash")
+    collection.delete(ids=ids)
+    return {"ids_deleted": ids, "doc_hash": doc_hash}
+
+
 def query_collection(
     collection: chromadb.Collection,
     query_embedding: list[float],
