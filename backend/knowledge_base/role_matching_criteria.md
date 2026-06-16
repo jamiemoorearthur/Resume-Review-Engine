@@ -433,6 +433,254 @@ Weak mathematical foundation
 **Strong signals:**
 Optimisation algorithms, quantitative research, trading infrastructure
 
+---
+
+## AI Solutions Engineer
+
+**Core technical skills required:**
+Python, APIs, LLMs, cloud platforms, system integration, software engineering fundamentals
+
+**Commonly required:**
+OpenAI API, Azure AI Services, AWS Bedrock, FastAPI, RAG architectures, vector databases
+
+**Soft skills:**
+Client communication, requirements gathering, solution design, stakeholder management
+
+**Red flags:**
+Only chatbot projects, no deployment experience, no software engineering fundamentals
+
+**Strong signals:**
+End-to-end AI implementations, customer-facing AI solutions, measurable business impact
+
+---
+
+## LLM Engineer
+
+**Core technical skills required:**
+Python, NLP, embeddings, vector databases, prompt engineering, model evaluation
+
+**Commonly required:**
+LangChain, LlamaIndex, Pinecone, Weaviate, RAG systems, OpenAI APIs
+
+**Soft skills:**
+Research mindset, experimentation, technical communication
+
+**Red flags:**
+Only prompt engineering experience, no production deployments
+
+**Strong signals:**
+Production RAG systems, AI agents, evaluation frameworks, scalable AI architectures
+
+---
+
+## AI Product Engineer
+
+**Core technical skills required:**
+Python, JavaScript/TypeScript, APIs, full-stack development, AI integrations
+
+**Commonly required:**
+React, Next.js, FastAPI, PostgreSQL, OpenAI APIs
+
+**Soft skills:**
+Product thinking, user-centric design, cross-functional collaboration
+
+**Red flags:**
+Strong engineering skills but no product ownership
+
+**Strong signals:**
+AI products launched to users, feature ownership, rapid prototyping and iteration
+
+---
+
+## Analytics Engineer
+
+**Core technical skills required:**
+SQL, data modelling, ETL/ELT, business intelligence tools
+
+**Commonly required:**
+dbt, Snowflake, BigQuery, Looker, Power BI, Airflow
+
+**Soft skills:**
+Business communication, stakeholder engagement
+
+**Red flags:**
+Only dashboard creation, weak SQL skills
+
+**Strong signals:**
+Semantic layer development, scalable data models, analytics engineering ownership
+
+---
+
+## Platform Engineer
+
+**Core technical skills required:**
+Linux, Kubernetes, Infrastructure as Code, cloud platforms, networking
+
+**Commonly required:**
+Terraform, Docker, AWS, Azure, GitHub Actions
+
+**Soft skills:**
+Automation mindset, operational excellence
+
+**Red flags:**
+Only application development experience
+
+**Strong signals:**
+Internal developer platforms, infrastructure automation, reliability improvements
+
+---
+
+## Cloud Architect
+
+**Core technical skills required:**
+AWS or Azure or GCP, networking, cloud security, architecture design
+
+**Commonly required:**
+Terraform, Kubernetes, FinOps, identity and access management
+
+**Certifications that strengthen a CV:**
+AWS Solutions Architect Professional, Azure Solutions Architect Expert
+
+**Red flags:**
+No large-scale architecture experience
+
+**Strong signals:**
+Enterprise cloud migrations, multi-cloud environments, architecture leadership
+
+---
+
+## AI Evaluation Engineer
+
+**Core technical skills required:**
+Python, statistics, machine learning evaluation, testing methodologies
+
+**Commonly required:**
+Prompt evaluation, benchmark development, RAG assessment frameworks, experimentation platforms
+
+**Soft skills:**
+Critical thinking, analytical reasoning
+
+**Red flags:**
+No quantitative evaluation methods
+
+**Strong signals:**
+Custom evaluation pipelines, hallucination reduction projects, AI quality assurance systems
+
+---
+
+## Research Software Engineer
+
+**Core technical skills required:**
+Python, software engineering, Git, scientific computing
+
+**Commonly required:**
+MATLAB, machine learning, HPC environments, Linux
+
+**Soft skills:**
+Academic collaboration, documentation, research communication
+
+**Red flags:**
+Research experience without software engineering practices
+
+**Strong signals:**
+Published research software, reproducible workflows, scientific tooling development
+---
+
+## Solutions Consultant
+
+**Core skills required:**
+Requirements gathering, technical presentations, solution design, stakeholder engagement
+
+**Commonly required:**
+Cloud platforms, SaaS products, APIs, CRM systems
+
+**Soft skills:**
+Client-facing communication, relationship management
+
+**Red flags:**
+No stakeholder interaction or presentation experience
+
+**Strong signals:**
+Pre-sales support, technical discovery workshops, solution architecture contributions
+
+---
+
+## AI Governance Analyst
+
+**Core technical skills required:**
+AI risk assessment, data governance, compliance frameworks, documentation
+
+**Commonly required:**
+EU AI Act knowledge, model risk management, responsible AI frameworks
+
+**Soft skills:**
+Risk management, communication, attention to detail
+
+**Red flags:**
+No AI-specific governance experience
+
+**Strong signals:**
+Responsible AI initiatives, model auditing projects, governance policy development
+
+---
+
+## Agentic Systems Engineer
+
+**Core technical skills required:**
+Python, LLM orchestration, workflow automation, APIs, distributed systems
+
+**Commonly required:**
+LangGraph, CrewAI, AutoGen, vector databases, RAG systems
+
+**Soft skills:**
+Systems thinking, debugging, experimentation
+
+**Red flags:**
+Only prompt engineering projects
+
+**Strong signals:**
+Multi-agent systems, autonomous workflow deployment, AI orchestration platforms
+
+---
+
+## Digital Health Data Scientist
+
+**Core technical skills required:**
+Python, SQL, statistics, machine learning, healthcare analytics
+
+**Commonly required:**
+Clinical datasets, cloud platforms, predictive modelling, healthcare reporting
+
+**Soft skills:**
+Scientific reasoning, stakeholder communication
+
+**Red flags:**
+No healthcare or biomedical data experience
+
+**Strong signals:**
+Clinical prediction models, healthcare AI applications, published healthcare analytics work
+
+---
+
+## Health Informatics Analyst
+
+**Core technical skills required:**
+SQL, Excel, healthcare data analysis, reporting
+
+**Commonly required:**
+Power BI, Tableau, NHS datasets, healthcare information systems
+
+**Soft skills:**
+Communication with clinical stakeholders, analytical thinking
+
+**Red flags:**
+No healthcare domain knowledge
+
+**Strong signals:**
+Electronic health record analytics, NHS projects, operational healthcare improvements
+
+---
+
 ## Role Alignment Scoring Guide
 
 When comparing a CV to a job description, assign role alignment scores as follows:
