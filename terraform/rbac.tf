@@ -1,22 +1,23 @@
 data "azurerm_client_config" "current" {}
 
-# Wait 30 seconds after RBAC assignments before the Container App tries to use them.
+# Wait 30 seconds after RBAC assignments before pods try to use them.
 # Azure RBAC can take a moment to propagate globally.
 resource "time_sleep" "rbac_propagation" {
-  depends_on      = [azurerm_role_assignment.app_acr_pull]
+  depends_on      = [azurerm_role_assignment.aks_acr_pull]
   create_duration = "30s"
 }
 
-# Container App managed identity can pull images from ACR
-resource "azurerm_role_assignment" "app_acr_pull" {
-  principal_id         = azurerm_container_app.app.identity[0].principal_id
+# AKS kubelet identity can pull images from ACR — no admin credentials needed
+resource "azurerm_role_assignment" "aks_acr_pull" {
+  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
   role_definition_name = "AcrPull"
   scope                = azurerm_container_registry.acr.id
 }
 
-# Container App managed identity can read secrets from Key Vault
-resource "azurerm_role_assignment" "app_kv_secrets_user" {
-  principal_id         = azurerm_container_app.app.identity[0].principal_id
+# Key Vault Secrets Provider addon identity can read secrets from Key Vault
+# This is the identity used by the CSI driver to mount secrets into pods
+resource "azurerm_role_assignment" "aks_kv_secrets_user" {
+  principal_id         = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
   role_definition_name = "Key Vault Secrets User"
   scope                = azurerm_key_vault.kv.id
 }

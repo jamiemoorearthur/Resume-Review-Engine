@@ -41,28 +41,29 @@ variable "storage_replication_type" {
   default     = "LRS"
 }
 
-# Container App
+# AKS
+variable "node_count" {
+  description = "Number of nodes in the default node pool"
+  type        = number
+  default     = 1
+}
+
+variable "node_vm_size" {
+  description = "VM size for AKS nodes"
+  type        = string
+  default     = "Standard_B2s"
+}
+
+# Image tag — passed in by CI/CD when pushing a new build
 variable "image_tag" {
-  description = "Docker image tag to deploy (defaults to latest)"
+  description = "Docker image tag to deploy"
   type        = string
   default     = "latest"
 }
 
-variable "container_cpu" {
-  description = "CPU allocation for the Container App (in cores)"
-  type        = number
-  default     = 0.5
-}
-
-variable "container_memory" {
-  description = "Memory allocation for the Container App"
-  type        = string
-  default     = "1Gi"
-}
-
 # Secrets — passed in at apply time, never hardcoded
 variable "openai_api_key" {
-  description = "OpenAI API key injected into pods at runtime"
+  description = "OpenAI API key — stored in Key Vault and mounted into pods via CSI driver"
   type        = string
   sensitive   = true
 }

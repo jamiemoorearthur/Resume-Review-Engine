@@ -6,9 +6,13 @@ output "acr_login_server" {
   value = azurerm_container_registry.acr.login_server
 }
 
-output "container_app_url" {
-  value       = "https://${azurerm_container_app.app.latest_revision_fqdn}"
-  description = "Public URL of the deployed CV Reviewer API"
+output "aks_cluster_name" {
+  value = azurerm_kubernetes_cluster.aks.name
+}
+
+output "aks_get_credentials_command" {
+  value       = "az aks get-credentials --resource-group ${azurerm_resource_group.rg.name} --name ${azurerm_kubernetes_cluster.aks.name}"
+  description = "Run this to configure kubectl to talk to the cluster"
 }
 
 output "key_vault_name" {

@@ -14,11 +14,23 @@ resource "azurerm_key_vault" "kv" {
   tags = var.tags
 }
 
-# Stores the OpenAI API key in Key Vault for auditing and rotation management
 resource "azurerm_key_vault_secret" "openai_key" {
   name         = "openai-api-key"
   value        = var.openai_api_key
   key_vault_id = azurerm_key_vault.kv.id
+  depends_on   = [azurerm_role_assignment.deployer_kv_secrets_officer]
+}
 
-  depends_on = [azurerm_role_assignment.deployer_kv_secrets_officer]
+resource "azurerm_key_vault_secret" "langfuse_public_key" {
+  name         = "langfuse-public-key"
+  value        = var.langfuse_public_key
+  key_vault_id = azurerm_key_vault.kv.id
+  depends_on   = [azurerm_role_assignment.deployer_kv_secrets_officer]
+}
+
+resource "azurerm_key_vault_secret" "langfuse_secret_key" {
+  name         = "langfuse-secret-key"
+  value        = var.langfuse_secret_key
+  key_vault_id = azurerm_key_vault.kv.id
+  depends_on   = [azurerm_role_assignment.deployer_kv_secrets_officer]
 }
