@@ -1,6 +1,6 @@
 # CV Reviewer AI
 
-An AI-powered CV review platform that analyses your resume against a real job description and returns structured, actionable feedback. Built with a RAG (Retrieval-Augmented Generation) pipeline, semantic search, and GPT-4o-mini to give feedback grounded in real hiring criteria — not generic advice.
+An AI-powered CV review platform that analyses your resume against a real job description and returns structured, actionable feedback. Built with a RAG (Retrieval-Augmented Generation) pipeline, semantic search, and GPT-4o-mini to give feedback grounded in real hiring criteria - not generic advice.
 
 [![CI](https://github.com/jamiemoorearthur/Resume-Review-Engine/actions/workflows/ci.yml/badge.svg)](https://github.com/jamiemoorearthur/Resume-Review-Engine/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python&logoColor=white)
@@ -60,12 +60,12 @@ Upload a CV (PDF) and paste a job description. The system returns:
 ```
 
 **Response fields:**
-- `overall_score` — weighted average across 7 rubric categories (0–100)
-- `ats_score` — ATS keyword match score (0–100)
-- `recruiter_score` — likelihood a recruiter shortlists this CV in a 6-second scan (0–10)
-- `category_scores` — individual raw score for each of the 7 rubric categories before weighting
-- `section_recommendations` — sections to add or remove based on the target role
-- `suggested_bullets` — rewrites that scale with CV quality: 4–6 for weak CVs, 0–1 for strong CVs
+- `overall_score` - weighted average across 7 rubric categories (0–100)
+- `ats_score` - ATS keyword match score (0–100)
+- `recruiter_score` - likelihood a recruiter shortlists this CV in a 6-second scan (0–10)
+- `category_scores` - individual raw score for each of the 7 rubric categories before weighting
+- `section_recommendations` - sections to add or remove based on the target role
+- `suggested_bullets` - rewrites that scale with CV quality: 4–6 for weak CVs, 0–1 for strong CVs
 
 ---
 
@@ -110,17 +110,17 @@ CV (PDF)  +  Job Description (text)
 
 The pipeline is instrumented end-to-end with production-grade observability, evaluation, and guardrails.
 
-### Observability — Langfuse
+### Observability - Langfuse
 
 Every request is traced in [Langfuse](https://langfuse.com/):
 
 | Span | What is captured |
 |---|---|
-| **Trace** | CV length, JD length, prompt version — one trace per review request |
+| **Trace** | CV length, JD length, prompt version - one trace per review request |
 | **Retrieval span** | Chunks retrieved, chunks dropped by relevance threshold, distance scores |
 | **Generation** | Full prompt sent to GPT, raw response, token usage, estimated cost per call |
 
-### RAG evaluation — Ragas
+### RAG evaluation - Ragas
 
 A [Ragas](https://ragas.io/) evaluation suite runs against a golden dataset of synthetic CV/JD pairs every Monday at 9am UTC via GitHub Actions:
 
@@ -140,7 +140,7 @@ OPENAI_API_KEY=sk-... python tests/eval/run_eval.py
 
 ### Prompt versioning
 
-System prompts live as versioned text files (`prompts/system_v1.0.0.txt`) and are loaded at runtime. The active version is set via `PROMPT_VERSION` and attached to every Langfuse trace — prompt changes can be correlated with score regressions without redeploying.
+System prompts live as versioned text files (`prompts/system_v1.0.0.txt`) and are loaded at runtime. The active version is set via `PROMPT_VERSION` and attached to every Langfuse trace - prompt changes can be correlated with score regressions without redeploying.
 
 ### Relevance threshold
 
@@ -158,13 +158,13 @@ After every GPT call, token usage and estimated cost are logged and attached to 
 
 The JSON response is scanned for hallucination markers (`"as an ai"`, `"i believe"`, `"i'm not sure"`) before being returned to the frontend. Any trigger is logged and flagged in the response payload for audit.
 
-### PII detection — Microsoft Presidio
+### PII detection - Microsoft Presidio
 
 Every CV submitted is scanned by [Presidio](https://microsoft.github.io/presidio/) before processing. Detected PII entities (names, emails, phone numbers) are logged for audit with a full record of what personal data was processed.
 
 ### Chunk metadata
 
-Every ChromaDB chunk carries a source filename, SHA-256 document hash, chunk index, and ingestion timestamp — enabling targeted deletes when documents change and a full audit trail for retrieved content.
+Every ChromaDB chunk carries a source filename, SHA-256 document hash, chunk index, and ingestion timestamp - enabling targeted deletes when documents change and a full audit trail for retrieved content.
 
 ---
 
@@ -203,7 +203,7 @@ Every ChromaDB chunk carries a source filename, SHA-256 document hash, chunk ind
 | Technology | Purpose |
 |---|---|
 | [Docker](https://www.docker.com/) | Containerisation |
-| [Fly.io](https://fly.io/) | Backend hosting — always-on, no cold starts, 512MB RAM, London region |
+| [Fly.io](https://fly.io/) | Backend hosting - always-on, no cold starts, 512MB RAM, London region |
 | [Vercel](https://vercel.com/) | Frontend hosting |
 | [Terraform](https://www.terraform.io/) | Azure infrastructure as code (AKS, ACR, Key Vault, storage) |
 | [Kubernetes](https://kubernetes.io/) | Container orchestration (AKS manifests ready for migration) |
@@ -219,7 +219,7 @@ Browser (Vercel)
       |
       | HTTPS POST /review (multipart/form-data)
       v
-FastAPI Backend (Fly.io — always-on, London region)
+FastAPI Backend (Fly.io - always-on, London region)
       |
       |-- pypdf extracts CV text
       |-- ChromaDB retrieves relevant knowledge base chunks (persisted Fly volume)
@@ -245,7 +245,7 @@ Every push to `main` runs three automated security checks that block deployment 
 
 | Tool | What it scans | Threshold |
 |---|---|---|
-| [Bandit](https://bandit.readthedocs.io/) | Python source code — injection, hardcoded secrets, unsafe functions | Medium and above |
+| [Bandit](https://bandit.readthedocs.io/) | Python source code - injection, hardcoded secrets, unsafe functions | Medium and above |
 | [pip-audit](https://pypi.org/project/pip-audit/) | Python dependencies against OSV and PyPI Advisory databases | Any known CVE |
 | [Trivy](https://trivy.dev/) | Docker image (OS packages + Python packages) | Critical and High (fixed only) |
 
@@ -260,10 +260,10 @@ Every push to `main` runs three automated security checks that block deployment 
 
 ### Secrets management
 
-- `.env` is in `.gitignore` — never committed
+- `.env` is in `.gitignore` - never committed
 - `.env.example` documents required variable names without values
-- On Fly.io, secrets are injected as environment variables via `fly secrets set` — never baked into the image
-- `CORS_ORIGINS` is a comma-separated env var parsed at runtime — no hardcoded origins in code
+- On Fly.io, secrets are injected as environment variables via `fly secrets set` - never baked into the image
+- `CORS_ORIGINS` is a comma-separated env var parsed at runtime - no hardcoded origins in code
 
 ---
 
@@ -273,7 +273,7 @@ Every push to `main` runs three automated security checks that block deployment 
 |---|---|---|
 | `GET` | `/health` | Health check |
 | `POST` | `/upload` | Parse a CV file and return extracted text |
-| `POST` | `/review` | Full AI review — scores, keywords, strengths, weaknesses, bullet rewrites |
+| `POST` | `/review` | Full AI review - scores, keywords, strengths, weaknesses, bullet rewrites |
 
 Full interactive documentation: [cv-reviewer-api.fly.dev/docs](https://cv-reviewer-api.fly.dev/docs)
 
@@ -377,17 +377,17 @@ Resume-Review-Engine/
 └── .github/workflows/
     ├── ci.yml              # Test, security scan, deploy to Fly.io on push to main
     ├── eval.yml            # Scheduled Ragas evaluation (Mondays 9am UTC)
-    ├── aks-provision.yml   # Manual — Terraform apply on Azure
-    ├── aks-cd.yml          # Manual — Build and deploy to AKS
-    └── aks-destroy.yml     # Manual — Tear down Azure resources
+    ├── aks-provision.yml   # Manual - Terraform apply on Azure
+    ├── aks-cd.yml          # Manual - Build and deploy to AKS
+    └── aks-destroy.yml     # Manual - Tear down Azure resources
 ```
 
 ---
 
 ## Roadmap
 
-- [ ] Prometheus metrics endpoint (`/metrics`) — request latency, score distributions, error rates
-- [ ] Grafana dashboard — visualise metrics from Prometheus
+- [ ] Prometheus metrics endpoint (`/metrics`) - request latency, score distributions, error rates
+- [ ] Grafana dashboard - visualise metrics from Prometheus
 - [ ] Score breakdown displayed on frontend (API fields `category_scores` already available)
 - [ ] User accounts and auth (Clerk)
 - [ ] Paywall for `recruiter_score` as a pro feature
@@ -399,6 +399,6 @@ Resume-Review-Engine/
 
 Built by [Seyi Bello](https://github.com/seyiabello), [Jamie Moore-Arthur](https://github.com/jamiemoorearthur), and [Rochelle Smith](https://github.com/rochellejjsmith).
 
-- **Seyi** — AI/application layer: RAG pipeline, embeddings, vector store, review logic, API endpoints, infrastructure (Fly.io, Terraform, Kubernetes, Azure), CI/CD, security scanning
-- **Jamie** — Knowledge base content, ingestion pipeline, file upload, FastAPI contributions
-- **Rochelle** — Frontend: React UI, component design, upload flow, results display, Vercel deployment
+- **Seyi** - AI/application layer: RAG pipeline, embeddings, vector store, review logic, API endpoints, infrastructure (Fly.io, Terraform, Kubernetes, Azure), CI/CD, security scanning
+- **Jamie** - Knowledge base content, ingestion pipeline, file upload, FastAPI contributions
+- **Rochelle** - Frontend: React UI, component design, upload flow, results display, Vercel deployment
