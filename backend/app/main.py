@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import health, review, upload, knowledge_base
+from app.api import health, review, upload, knowledge_base, testimonial
 from app.core.config import settings
 from app.ingestion.chunker import chunk_text
 from app.embeddings.embedder import embed_texts
