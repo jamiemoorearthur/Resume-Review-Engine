@@ -2,7 +2,75 @@ import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { reviewCV } from '../api/api'
+import Loading from '../components/Loading'
 import '../styles/Upload.css'
+
+// Maps a failed request to a specific, actionable message instead of one
+// generic catch-all. Falls back to the backend's own detail message when we
+// don't have a more specific mapping, and only uses a hardcoded fallback if
+// nothing useful came back at all (e.g. network failure, server unreachable).
+function getErrorMessage(err) {
+  // No response at all = network issue / server unreachable / CORS
+  if (!err.response) {
+    return {
+      title: 'Connection problem',
+      message: "We couldn't reach the server. Check your connection and try again.",
+    }
+  }
+
+  const status = err.response.status
+  const detail = err.response.data?.detail || ''
+  const detailLower = detail.toLowerCase()
+
+  // 400s from the backend's input gate — these carry a specific reason
+  if (status === 400) {
+    if (detailLower.includes('unsupported file type')) {
+      return {
+        title: 'Unsupported file type',
+        message: 'Please upload your CV as a PDF.',
+      }
+    }
+    if (detailLower.includes('no text could be extracted')) {
+      return {
+        title: "Couldn't read your CV",
+        message: 'This looks like a scanned or image-based PDF. Please upload a text-based PDF instead.',
+      }
+    }
+    if (detailLower.includes('exceeds maximum length')) {
+      return {
+        title: 'Content too long',
+        message: detailLower.includes('cv')
+          ? 'Your CV is too long. Please shorten it and try again.'
+          : 'The job description is too long. Please shorten it and try again.',
+      }
+    }
+    if (detailLower.includes('disallowed content')) {
+      return {
+        title: 'Content not allowed',
+        message: 'Your CV or job description contains content we can\'t process. Please review and try again.',
+      }
+    }
+    // Generic 400 fallback — still show the backend's own message, it's better than nothing
+    return {
+      title: 'Invalid submission',
+      message: detail || 'Please check your CV and job description and try again.',
+    }
+  }
+
+  // 500s — pipeline/LLM failures, out of our control but worth distinguishing from input errors
+  if (status >= 500) {
+    return {
+      title: 'Server error',
+      message: 'Something went wrong on our end while analysing your CV. Please try again in a moment.',
+    }
+  }
+
+  // Anything else unexpected
+  return {
+    title: 'Something went wrong',
+    message: detail || 'Please try again.',
+  }
+}
 
 function Upload() {
   const [file, setFile] = useState(null)
@@ -25,8 +93,8 @@ function Upload() {
   })
 
   const handleSubmit = async () => {
-    if (!file) return setError('Please upload your CV first.')
-    if (!jobDescription.trim()) return setError('Please paste a job description.')
+    if (!file) return setError({ title: 'CV required', message: 'Please upload your CV first.' })
+    if (!jobDescription.trim()) return setError({ title: 'Job description required', message: 'Please paste a job description.' })
 
     try {
       setLoading(true)
@@ -34,17 +102,33 @@ function Upload() {
       const result = await reviewCV(file, jobDescription)
       navigate('/results', { state: { result } })
     } catch (err) {
-      setError('Something went wrong. Please try again.')
-    } finally {
+      setError(getErrorMessage(err))
       setLoading(false)
     }
+  }
+
+  // While the API call is in flight, replace the form with the multi-stage loading screen
+  if (loading) {
+    return (
+      <div className="upload-page">
+        <nav className="navbar">
+          <div className="nav-inner">
+            <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+              <div className="logo-mark">IQ</div>
+              <span className="logo-text">CV<span className="logo-accent">IQ</span></span>
+            </div>
+          </div>
+        </nav>
+        <Loading />
+      </div>
+    )
   }
 
   return (
     <div className="upload-page">
       <nav className="navbar">
         <div className="nav-inner">
-          <div className="logo">
+          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <div className="logo-mark">IQ</div>
             <span className="logo-text">CV<span className="logo-accent">IQ</span></span>
           </div>
@@ -98,8 +182,13 @@ function Upload() {
             <p className="field-hint">Tip: include the full job description for the most accurate feedback.</p>
           </div>
 
-          {/* Error */}
-          {error && <div className="error-msg">{error}</div>}
+          {/* Error — now shows a specific title + message instead of one generic line */}
+          {error && (
+            <div className="error-msg">
+              <strong className="error-msg-title">{error.title}</strong>
+              <span className="error-msg-text">{error.message}</span>
+            </div>
+          )}
 
           {/* Submit */}
           <button
@@ -107,18 +196,14 @@ function Upload() {
             onClick={handleSubmit}
             disabled={loading}
           >
-            {loading ? 'Analysing your CV...' : 'Analyse my CV →'}
+            Analyse my CV →
           </button>
-
-          {loading && (
-            <p className="loading-hint">This may take up to 30 seconds on first load while the server wakes up.</p>
-          )}
         </div>
       </div>
 
       <footer className="footer">
         <div className="footer-inner">
-          <div className="logo">
+          <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <div className="logo-mark">IQ</div>
             <span className="logo-text">CV<span className="logo-accent">IQ</span></span>
           </div>
