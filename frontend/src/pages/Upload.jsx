@@ -5,10 +5,17 @@ import { reviewCV } from '../api/api'
 import Loading from '../components/Loading'
 import '../styles/Upload.css'
 
-// Maps a failed request to a specific, actionable message instead of one
-// generic catch-all. Falls back to the backend's own detail message when we
-// don't have a more specific mapping, and only uses a hardcoded fallback if
-// nothing useful came back at all (e.g. network failure, server unreachable).
+// Converts a File object into a base64 string so we can store it in
+// sessionStorage and show a preview on the results page
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result.split(',')[1]) // strip the "data:...;base64," prefix
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 function getErrorMessage(err) {
   if (!err.response) {
     return {
@@ -16,55 +23,19 @@ function getErrorMessage(err) {
       message: "We couldn't reach the server. Check your connection and try again.",
     }
   }
-
   const status = err.response.status
   const detail = err.response.data?.detail || ''
   const detailLower = detail.toLowerCase()
 
   if (status === 400) {
-    if (detailLower.includes('unsupported file type')) {
-      return {
-        title: 'Unsupported file type',
-        message: 'Please upload your CV as a .pdf or .docx file.',
-      }
-    }
-    if (detailLower.includes('no text could be extracted')) {
-      return {
-        title: "Couldn't read your CV",
-        message: 'This looks like a scanned or image-based file. Please upload a text-based .pdf or .docx file instead.',
-      }
-    }
-    if (detailLower.includes('exceeds maximum length')) {
-      return {
-        title: 'Content too long',
-        message: detailLower.includes('cv')
-          ? 'Your CV is too long. Please shorten it and try again.'
-          : 'The job description is too long. Please shorten it and try again.',
-      }
-    }
-    if (detailLower.includes('disallowed content')) {
-      return {
-        title: 'Content not allowed',
-        message: 'Your CV or job description contains content we can\'t process. Please review and try again.',
-      }
-    }
-    return {
-      title: 'Invalid submission',
-      message: detail || 'Please check your CV and job description and try again.',
-    }
+    if (detailLower.includes('unsupported file type')) return { title: 'Unsupported file type', message: 'Please upload your CV as a .pdf or .docx file.' }
+    if (detailLower.includes('no text could be extracted')) return { title: "Couldn't read your CV", message: 'This looks like a scanned or image-based file. Please upload a text-based .pdf or .docx file instead.' }
+    if (detailLower.includes('exceeds maximum length')) return { title: 'Content too long', message: detailLower.includes('cv') ? 'Your CV is too long. Please shorten it and try again.' : 'The job description is too long. Please shorten it and try again.' }
+    if (detailLower.includes('disallowed content')) return { title: 'Content not allowed', message: "Your CV or job description contains content we can't process. Please review and try again." }
+    return { title: 'Invalid submission', message: detail || 'Please check your CV and job description and try again.' }
   }
-
-  if (status >= 500) {
-    return {
-      title: 'Server error',
-      message: 'Something went wrong on our end while analysing your CV. Please try again in a moment.',
-    }
-  }
-
-  return {
-    title: 'Something went wrong',
-    message: detail || 'Please try again.',
-  }
+  if (status >= 500) return { title: 'Server error', message: 'Something went wrong on our end while analysing your CV. Please try again in a moment.' }
+  return { title: 'Something went wrong', message: detail || 'Please try again.' }
 }
 
 function Upload() {
@@ -97,8 +68,21 @@ function Upload() {
     try {
       setLoading(true)
       setError(null)
-      const result = await reviewCV(file, jobDescription)
-      navigate('/results', { state: { result } })
+
+      // Run the API call and the base64 conversion at the same time so we
+      // don't add any extra waiting time for the user
+      const [result, fileBase64] = await Promise.all([
+        reviewCV(file, jobDescription),
+        fileToBase64(file),
+      ])
+
+      // Pass both the results AND the file data to the results page
+      navigate('/results', {
+        state: {
+          result,
+          cvFile: { base64: fileBase64, type: file.type, name: file.name },
+        },
+      })
     } catch (err) {
       setError(getErrorMessage(err))
       setLoading(false)
@@ -143,12 +127,8 @@ function Upload() {
         <div className="upload-form">
           <div {...getRootProps()} className={`dropzone ${isDragActive ? 'active' : ''} ${file ? 'has-file' : ''}`}>
             <input {...getInputProps()} />
-            <div className="dropzone-icon">
-              <span>📄</span>
-            </div>
-            <p className="dropzone-title">
-              {isDragActive ? 'Drop it here!' : 'Drag & drop your CV here'}
-            </p>
+            <div className="dropzone-icon"><span>📄</span></div>
+            <p className="dropzone-title">{isDragActive ? 'Drop it here!' : 'Drag & drop your CV here'}</p>
             <p className="dropzone-sub">or click to browse — .pdf or .docx</p>
             <button className="btn-choose" type="button">Choose file</button>
           </div>
@@ -183,11 +163,7 @@ function Upload() {
             </div>
           )}
 
-          <button
-            className="btn-primary"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <button className="btn-primary" onClick={handleSubmit} disabled={loading}>
             Analyse my CV →
           </button>
         </div>

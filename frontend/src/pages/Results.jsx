@@ -6,28 +6,27 @@ import ResultPanel from '../components/ResultPanel'
 import KeywordList from '../components/KeywordList'
 import BulletRewrites from '../components/BulletRewrites'
 import SectionRecommendations from '../components/SectionRecommendations'
+import CVModal from '../components/CVModal'
 import '../styles/Results.css'
 
 // These control the "boxes fade and slide up one after another" animation
 const containerVariants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.18 }, // wait 0.18s before showing the next box
-  },
+  show: { opacity: 1, transition: { staggerChildren: 0.18 } },
 }
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 36, scale: 0.98 }, // start invisible, slightly lower, slightly smaller
+  hidden: { opacity: 0, y: 36, scale: 0.98 },
   show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] } },
 }
 
-// This is the "name" we use to save the results in the browser's storage
-const STORAGE_KEY = 'cviq:last-result'
+const RESULT_KEY = 'cviq:last-result'
+const FILE_KEY = 'cviq:last-cv-file' // separate key so a large file doesn't slow down result reads
 
 function Results() {
   const location = useLocation()
   const navigate = useNavigate()
+  const [showCVModal, setShowCVModal] = useState(false)
 
   // When this page first loads, we need to figure out where the results come from.
   // There are two options:
@@ -37,29 +36,37 @@ function Results() {
   //    until you close the tab
   const [result, setResult] = useState(() => {
     const fromNav = location.state?.result
-    if (fromNav) return fromNav // got it the normal way, just use it
-
-    // otherwise, try to find a saved copy in the browser's notepad
+    if (fromNav) return fromNav
     try {
-      const stored = sessionStorage.getItem(STORAGE_KEY)
+      const stored = sessionStorage.getItem(RESULT_KEY)
       return stored ? JSON.parse(stored) : null
-    } catch {
-      return null // if anything goes wrong, just say we don't have results
-    }
+    } catch { return null }
+  })
+
+  // Same idea for the CV file — prefer what came via navigation, fall back to storage
+  const [cvFile, setCvFile] = useState(() => {
+    const fromNav = location.state?.cvFile
+    if (fromNav) return fromNav
+    try {
+      const stored = sessionStorage.getItem(FILE_KEY)
+      return stored ? JSON.parse(stored) : null
+    } catch { return null }
   })
 
   // Every time we get new results, save a copy to the browser's notepad.
   // That way, if the page gets refreshed later, we can still find them.
   useEffect(() => {
     if (result) {
-      try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(result))
-      } catch {
-        // saving can fail sometimes (like in private/incognito mode) —
-        // that's okay, it just means refresh won't work this one time
-      }
+      try { sessionStorage.setItem(RESULT_KEY, JSON.stringify(result)) } catch {}
     }
   }, [result])
+
+  // Save the CV file to sessionStorage the same way
+  useEffect(() => {
+    if (cvFile) {
+      try { sessionStorage.setItem(FILE_KEY, JSON.stringify(cvFile)) } catch {}
+    }
+  }, [cvFile])
 
   // IMPORTANT: if we have no results at all, send the user back to the
   // homepage. This has to happen inside useEffect (not just directly in the
@@ -67,16 +74,12 @@ function Results() {
   // still in the middle of drawing the page — it can cause the whole page
   // to go blank instead of redirecting properly.
   useEffect(() => {
-    if (!result) {
-      navigate('/')
-    }
+    if (!result) navigate('/')
   }, [result, navigate])
 
   // While we're waiting to redirect (or if there's just nothing to show),
   // don't render anything
-  if (!result) {
-    return null
-  }
+  if (!result) return null
 
   return (
     <div className="results-page">
@@ -90,7 +93,6 @@ function Results() {
         </div>
       </nav>
 
-      {/* Hero band */}
       <div className="results-hero">
         <div>
           <div className="results-eyebrow">
@@ -99,6 +101,12 @@ function Results() {
           <h1>Your CV results</h1>
           <p className="results-hero-sub">Here's how your CV performed against the job description.</p>
         </div>
+        {/* Only show the "View my CV" button if we actually have the file */}
+        {cvFile && (
+          <button className="btn-view-cv" onClick={() => setShowCVModal(true)}>
+            📄 View my CV
+          </button>
+        )}
       </div>
 
       <motion.div
@@ -115,26 +123,18 @@ function Results() {
             categoryScores={result.category_scores}
           />
         </motion.div>
-
         <motion.div variants={itemVariants}>
-          <ResultPanel
-            strengths={result.strengths}
-            weaknesses={result.weaknesses}
-          />
+          <ResultPanel strengths={result.strengths} weaknesses={result.weaknesses} />
         </motion.div>
-
         <motion.div variants={itemVariants}>
           <KeywordList keywords={result.missing_keywords} />
         </motion.div>
-
         <motion.div variants={itemVariants}>
           <BulletRewrites bullets={result.suggested_bullets} />
         </motion.div>
-
         <motion.div variants={itemVariants}>
           <SectionRecommendations recommendations={result.section_recommendations} />
         </motion.div>
-
         <motion.div className="results-cta" variants={itemVariants}>
           <div>
             <h3>Want to improve your score?</h3>
@@ -153,6 +153,16 @@ function Results() {
           <p className="footer-text">Built with FastAPI, React & GPT-4o · © 2026 CVIQ</p>
         </div>
       </footer>
+
+      {/* CV preview modal — only mounts when the user clicks "View my CV" */}
+      {showCVModal && cvFile && (
+        <CVModal
+          fileBase64={cvFile.base64}
+          fileType={cvFile.type}
+          fileName={cvFile.name}
+          onClose={() => setShowCVModal(false)}
+        />
+      )}
     </div>
   )
 }
