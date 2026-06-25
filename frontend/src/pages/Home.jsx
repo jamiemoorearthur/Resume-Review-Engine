@@ -19,7 +19,8 @@ function Home() {
             <a href="#features">Features</a>
           </div>
           <div className="nav-right">
-            <button className="btn-dark" onClick={() => navigate('/upload')}>Get started free</button>
+          <button className="btn-ghost-sm" onClick={() => navigate('/login')}>Log in</button>
+          <button className="btn-dark" onClick={() => navigate('/signup')}>Sign up free</button>
           </div>
           <button className="burger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
             <span /><span /><span />
