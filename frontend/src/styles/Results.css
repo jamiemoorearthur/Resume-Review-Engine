@@ -190,3 +190,10 @@
   .cv-modal-wide { height: 94vh; border-radius: 12px; }
   .cv-modal-docx { padding: 20px 22px; }
 }
+
+/* ── Download buttons + error ────────────────────────── */
+.results-hero-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn-download { background: rgba(59,130,246,0.1); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); padding: 10px 18px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+.btn-download:hover:not(:disabled) { background: rgba(59,130,246,0.18); color: #fff; }
+.btn-download:disabled { opacity: 0.5; cursor: not-allowed; }
+.download-error { font-size: 13px; color: #fca5a5; margin-top: 8px; width: 100%; }

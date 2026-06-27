@@ -8,6 +8,7 @@ import BulletRewrites from '../components/BulletRewrites'
 import SectionRecommendations from '../components/SectionRecommendations'
 import CVModal from '../components/CVModal'
 import { extractCvText, filterTrulyMissing } from '../utils/filterKeywords'
+import { downloadEditedCV } from '../utils/downloadCV'
 import '../styles/Results.css'
 
 const containerVariants = {
@@ -27,13 +28,10 @@ function Results() {
   const location = useLocation()
   const navigate = useNavigate()
   const [showCVModal, setShowCVModal] = useState(false)
+  const [downloadingFormat, setDownloadingFormat] = useState(null) // 'pdf' | 'docx' | null
+  const [downloadError, setDownloadError] = useState(null)
 
-  // When this page first loads, we need to figure out where the results come from.
-  // There are two options:
-  // 1. Normal way: the Upload page sent us here and passed the results along
-  // 2. Refresh: the user reloaded the page, so option 1 is gone — instead we
-  //    check sessionStorage, which is like a notepad the browser remembers
-  //    until you close the tab
+
   const [result, setResult] = useState(() => {
     const fromNav = location.state?.result
     if (fromNav) return fromNav
@@ -63,15 +61,13 @@ function Results() {
         const cvText = await extractCvText(cvFile.base64, cvFile.type)
         setFilteredKeywords(filterTrulyMissing(result.missing_keywords, cvText))
       } catch {
-        // If extraction fails for any reason, just show the original list
         setFilteredKeywords(result.missing_keywords)
       }
     }
     verifyKeywords()
   }, [cvFile, result])
 
-  // Every time we get new results, save a copy to the browser's notepad.
-  // That way, if the page gets refreshed later, we can still find them.
+
   useEffect(() => {
     if (result) {
       try { sessionStorage.setItem(RESULT_KEY, JSON.stringify(result)) } catch {}
@@ -84,14 +80,23 @@ function Results() {
     }
   }, [cvFile])
 
-  // IMPORTANT: if we have no results at all, send the user back to the
-  // homepage. This has to happen inside useEffect (not just directly in the
-  // component) because React gets upset if you try to "redirect" while it's
-  // still in the middle of drawing the page — it can cause the whole page
-  // to go blank instead of redirecting properly.
+ 
   useEffect(() => {
     if (!result) navigate('/')
   }, [result, navigate])
+
+  const handleDownload = async (format) => {
+    if (!cvFile) return
+    try {
+      setDownloadingFormat(format)
+      setDownloadError(null)
+      await downloadEditedCV(cvFile, result, format)
+    } catch (err) {
+      setDownloadError(err.message || 'Download failed. Please try again.')
+    } finally {
+      setDownloadingFormat(null)
+    }
+  }
 
   if (!result) return null
 
@@ -115,10 +120,33 @@ function Results() {
           <h1>Your CV results</h1>
           <p className="results-hero-sub">Here's how your CV performed against the job description.</p>
         </div>
+
+        {/* Action buttons — only show if we have the CV file */}
         {cvFile && (
-          <button className="btn-view-cv" onClick={() => setShowCVModal(true)}>
-            📄 View my CV
-          </button>
+          <div className="results-hero-actions">
+            <button className="btn-view-cv" onClick={() => setShowCVModal(true)}>
+              📄 View my CV
+            </button>
+            <button
+              className="btn-download"
+              onClick={() => handleDownload('docx')}
+              disabled={!!downloadingFormat}
+            >
+              {downloadingFormat === 'docx' ? 'Downloading...' : '⬇ Download .docx'}
+            </button>
+            <button
+              className="btn-download"
+              onClick={() => handleDownload('pdf')}
+              disabled={!!downloadingFormat}
+            >
+              {downloadingFormat === 'pdf' ? 'Downloading...' : '⬇ Download PDF'}
+            </button>
+          </div>
+        )}
+
+        {/* Show an error if the download fails */}
+        {downloadError && (
+          <div className="download-error">{downloadError}</div>
         )}
       </div>
 
@@ -140,7 +168,6 @@ function Results() {
           <ResultPanel strengths={result.strengths} weaknesses={result.weaknesses} />
         </motion.div>
         <motion.div variants={itemVariants}>
-          {/* Pass the filtered keywords so false positives don't show up here either */}
           <KeywordList keywords={filteredKeywords} />
         </motion.div>
         <motion.div variants={itemVariants}>
