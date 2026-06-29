@@ -75,7 +75,7 @@ jobs:
       - name: Smoke test
         run: |
           for i in $(seq 1 12); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://129.159.222.241/health)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://cvreview-api.duckdns.org/health)
             if [ "$STATUS" = "200" ]; then
               echo "Health check passed (attempt $i)"
               exit 0
